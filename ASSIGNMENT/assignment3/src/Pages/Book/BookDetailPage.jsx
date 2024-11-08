@@ -3,16 +3,15 @@ import { useParams, Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
 const BookDetailPage = () => {
-    const { id } = useParams(); // Retrieve the book ID from the URL
+    const { id } = useParams();
     const books = JSON.parse(localStorage.getItem('books')) || [];
-    const book = books.find((b) => b.id === id); // Find the specific book by ID
+    const book = books.find((b) => b.id === id);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [updatedBook, setUpdatedBook] = useState({
         ...book, availability: book.availability || "No" // Default to "No" if undefined
     });
 
-    // Handle input changes for the modal form
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
         setUpdatedBook({
@@ -20,7 +19,6 @@ const BookDetailPage = () => {
         });
     };
 
-    // Handle form submission to update book details
     const handleSubmit = (e) => {
         e.preventDefault();
         const updatedBooks = books.map((b) =>
@@ -168,7 +166,7 @@ const BookDetailPage = () => {
                                 </button>
                                 <button
                                     type="button"
-                                    onClick={() => setIsModalOpen(false)} // Close the modal
+                                    onClick={() => setIsModalOpen(false)}
                                     className="bg-gray-500 text-white px-4 py-2 rounded"
                                 >
                                     Cancel

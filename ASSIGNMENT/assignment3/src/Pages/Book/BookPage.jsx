@@ -8,7 +8,6 @@ const BookPage = () => {
     const [books, setBooks] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // Load books from localStorage
     useEffect(() => {
         const storedBooks = JSON.parse(localStorage.getItem('books')) || [];
         setBooks(storedBooks);
