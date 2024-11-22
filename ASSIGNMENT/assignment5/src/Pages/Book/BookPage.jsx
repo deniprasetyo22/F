@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Swal from "sweetalert2";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -7,15 +7,22 @@ import Button from '../../components/Elements/Button';
 import BookService from '../../Services/BookService';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import ReactPaginate from 'react-paginate';
+import Loading from '../../components/Elements/Loading';
 
-const fetchBooks = async ({ pageNumber, pageSize, searchQuery, sortField, sortOrder }) => {
-    const { data } = await BookService.getAll({
+const fetchBooks = async ({ pageNumber, pageSize, searchQuery, sortField, sortOrder, searchType }) => {
+    const params = {
         PageNumber: pageNumber,
         PageSize: pageSize,
-        Keyword: searchQuery,
         SortBy: sortField,
-        SortOrder: sortOrder
-    });
+        SortOrder: sortOrder,
+        Keyword: searchType === 'keyword' ? searchQuery : '',
+        BookId: searchType === 'bookId' ? searchQuery : '',
+        Title: searchType === 'title' ? searchQuery : '',
+        Author: searchType === 'author' ? searchQuery : '',
+        ISBN: searchType === 'isbn' ? searchQuery : '',
+    };
+
+    const { data } = await BookService.getAll(params);
     return data;
 };
 
@@ -23,22 +30,34 @@ const BookPage = () => {
     const [pageNumber, setPageNumber] = useState(1);
     const [pageSize, setPageSize] = useState(5);
     const pageSizes = [5, 10, 25, 50];
-    const [sortField, setSortField] = useState('');
-    const [sortOrder, setSortOrder] = useState('asc');
+    const [sortField, setSortField] = useState('bookId');
+    const [sortOrder, setSortOrder] = useState('desc');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchType, setSearchType] = useState('keyword');
 
-    const { data, isLoading, isError } = useQuery({
-        queryKey: ['books', pageNumber, pageSize, sortField, sortOrder],
-        queryFn: () => fetchBooks({ pageNumber, pageSize, sortField, sortOrder }),
-        placeholderData: keepPreviousData
+    const { data, isLoading, isError, refetch } = useQuery({
+        queryKey: ['books', pageNumber, pageSize, sortField, sortOrder, searchQuery, searchType],
+        queryFn: () => fetchBooks({ pageNumber, pageSize, sortField, sortOrder, searchQuery, searchType }),
+        placeholderData: keepPreviousData,
     });
 
-    if (isLoading) return <p>Loading...</p>;
+    if (isLoading) return <Loading isLoading={isLoading} />;
     if (isError) return <p>Error fetching books</p>;
 
     const totalPages = Math.ceil(data.total / pageSize);
 
     const handlePageSizeChange = (event) => {
         setPageSize(Number(event.target.value));
+        setPageNumber(1);
+    };
+
+    const handleSearchChange = (event) => {
+        setSearchQuery(event.target.value);
+        setPageNumber(1);
+    };
+
+    const handleSearchTypeChange = (event) => {
+        setSearchType(event.target.value);
         setPageNumber(1);
     };
 
@@ -57,6 +76,7 @@ const BookPage = () => {
             try {
                 await BookService.remove(bookId);
                 Swal.fire('Deleted!', 'Your book has been deleted.', 'success');
+                refetch();
             } catch (error) {
                 console.error("Error deleting book:", error);
                 Swal.fire("Error", "Failed to delete the book. Please try again later.", "error");
@@ -85,12 +105,30 @@ const BookPage = () => {
 
     return (
         <div className="p-4 border rounded mb-5">
-            <h2 className="text-lg font-bold text-center">Book List</h2>
-            <div className="py-4">
-                <Link to="/books/add" className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md shadow transition duration-200">
-                    <FontAwesomeIcon icon={faPlus} className="mr-1" />
-                    <span className="font-semibold text-sm">Add</span>
-                </Link>
+            <h2 className="text-lg font-bold text-center mb-5">Book List</h2>
+            <div className="flex flex-col md:flex-row justify-between items-start mb-2">
+                <Button variant="bg-blue-600 hover:bg-blue-700">
+                    <Link to="/books/add" className="flex items-center">
+                        <FontAwesomeIcon icon={faPlus} className="mr-1" />
+                        <span className="text-sm">Add</span>
+                    </Link>
+                </Button>
+                <div className="flex flex-col md:flex-row  md:space-x-2 w-full md:w-1/2 justify-end">
+                    <select value={searchType} onChange={handleSearchTypeChange} className="border border-gray-300 p-2 rounded-lg mb-2 md:mb-0 md:w-1/4">
+                        <option value="keyword">By Keyword</option>
+                        <option value="bookId">By Book ID</option>
+                        <option value="title">By Title</option>
+                        <option value="author">By Author</option>
+                        <option value="isbn">By ISBN</option>
+                    </select>
+                    <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={handleSearchChange}
+                        placeholder={`Search By ${searchType.charAt(0).toUpperCase() + searchType.slice(1)}`}
+                        className="border border-gray-300 rounded-lg p-2 md:w-3/4"
+                    />
+                </div>
             </div>
             <div className="overflow-x-auto">
                 <table className="w-full border-collapse border rounded-md overflow-hidden">
@@ -98,9 +136,9 @@ const BookPage = () => {
                         <tr className="bg-gray-600 text-white">
                             <th className="border p-2">
                                 <button variant="link"
-                                    onClick={() => handleSort('bookId')}
+                                    onClick={() => handleSort('bookid')}
                                     className="text-decoration-none text-dark p-0">
-                                    ID {getSortIcon('bookId')}
+                                    ID {getSortIcon('bookid')}
                                 </button>
                             </th>
                             <th className="border p-2">

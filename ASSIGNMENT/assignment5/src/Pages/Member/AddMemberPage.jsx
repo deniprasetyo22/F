@@ -1,154 +1,124 @@
 import React, { useEffect, useRef, useState } from 'react';
-import Swal from 'sweetalert2';
 import { Link, useNavigate } from 'react-router-dom';
-import { nanoid } from 'nanoid';
 import Button from '../../components/Elements/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import MemberService from '../../Services/MemberService';
 
 const AddMemberPage = () => {
   const [member, setMember] = useState({
-    id: '',
-    fullName: '',
-    email: '',
-    gender: '',
-    phone: '',
-    address: ''
+    firstName: '',
+    lastName: '',
+    position: '',
+    privilage: '',
+    libraryCardNumber: '',
+    notes: '',
   });
-
-  const [hasInput, setHasInput] = useState(false);
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
-  const fullNameInputRef = useRef(null);
+  const firstNameInputRef = useRef(null);
 
   useEffect(() => {
-    fullNameInputRef.current.focus();
+    firstNameInputRef.current.focus();
   }, []);
 
-  // Validasi Full Name
-  const handleFullNameChange = (event) => {
-    setMember((prevMember) => ({ ...prevMember, fullName: event.target.value }));
-    let errorMessage = "";
+  // Handle First Name Change
+  const handleFirstNameChange = (event) => {
+    setMember((prevMember) => ({ ...prevMember, firstName: event.target.value }));
+    let errorMessage = '';
 
     if (!event.target.value.trim()) {
-      errorMessage = "Full Name is required.";
+      errorMessage = 'First Name is required.';
     }
 
-    setErrors((prevErrors) => ({ ...prevErrors, fullName: errorMessage }));
+    setErrors((prevErrors) => ({ ...prevErrors, firstName: errorMessage }));
   };
 
-  // Validasi Email
-  const handleEmailChange = (event) => {
-    setMember((prevMember) => ({ ...prevMember, email: event.target.value }));
-    let errorMessage = "";
+  // Handle Last Name Change
+  const handleLastNameChange = (event) => {
+    setMember((prevMember) => ({ ...prevMember, lastName: event.target.value }));
+    let errorMessage = '';
 
     if (!event.target.value.trim()) {
-      errorMessage = "Email is required.";
-    } else if (!/\S+@\S+\.\S+/.test(event.target.value)) {
-      errorMessage = "Please enter a valid email address.";
+      errorMessage = 'Last Name is required.';
     }
 
-    setErrors((prevErrors) => ({ ...prevErrors, email: errorMessage }));
+    setErrors((prevErrors) => ({ ...prevErrors, lastName: errorMessage }));
   };
 
-  // Validasi Phone
-  const handlePhoneChange = (event) => {
-    setMember((prevMember) => ({ ...prevMember, phone: event.target.value }));
-    let errorMessage = "";
-
-    // Validasi: nomor telepon harus dimulai dengan "+" diikuti kode negara dan angka
-    const phoneRegex = /^\+(\d{1,3})\d{9,14}$/;  // Format: +[kode negara][nomor]
+  // Handle Position Change
+  const handlePositionChange = (event) => {
+    setMember((prevMember) => ({ ...prevMember, position: event.target.value }));
+    let errorMessage = '';
 
     if (!event.target.value.trim()) {
-      errorMessage = "Phone number is required.";
-    } else if (!phoneRegex.test(event.target.value)) {
-      errorMessage = "Phone number must follow correct international format (+62...) and 9-14 digits.";
+      errorMessage = 'Position is required.';
     }
 
-    setErrors((prevErrors) => ({ ...prevErrors, phone: errorMessage }));
+    setErrors((prevErrors) => ({ ...prevErrors, position: errorMessage }));
   };
 
-
-  // Validasi Gender
-  const handleGenderChange = (event) => {
-    setMember((prevMember) => ({ ...prevMember, gender: event.target.value }));
-    setErrors((prevErrors) => ({ ...prevErrors, gender: "" }));
-  };
-
-  // Validasi Address
-  const handleAddressChange = (event) => {
-    setMember((prevMember) => ({ ...prevMember, address: event.target.value }));
-    let errorMessage = "";
+  // Handle Library Card Number Change
+  const handleLibraryCardNumberChange = (event) => {
+    setMember((prevMember) => ({ ...prevMember, libraryCardNumber: event.target.value }));
+    let errorMessage = '';
 
     if (!event.target.value.trim()) {
-      errorMessage = "Address is required.";
+      errorMessage = 'Library Card Number is required.';
     }
 
-    setErrors((prevErrors) => ({ ...prevErrors, address: errorMessage }));
+    setErrors((prevErrors) => ({ ...prevErrors, libraryCardNumber: errorMessage }));
   };
 
-  // Handle submit
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  // Handle Privilage Change
+  const handlePrivilageChange = (event) => {
+    setMember((prevMember) => ({ ...prevMember, privilage: event.target.value }));
+    let errorMessage = '';
 
-    let currentErrors = { ...errors };
+    setErrors((prevErrors) => ({ ...prevErrors, privilage: errorMessage }));
+  };
 
-    // Check for any empty required fields and add error messages
-    if (!member.fullName.trim()) currentErrors.fullName = "Full Name is required.";
-    if (!member.email.trim()) currentErrors.email = "Email is required.";
-    if (!member.phone.trim()) currentErrors.phone = "Phone number is required.";
-    if (!member.gender.trim()) currentErrors.gender = "Gender is required.";
-    if (!member.address.trim()) currentErrors.address = "Address is required.";
+  // Handle Notes Change
+  const handleNotesChange = (event) => {
+    setMember((prevMember) => ({ ...prevMember, notes: event.target.value }));
+    let errorMessage = '';
 
-    // Update errors state
+    setErrors((prevErrors) => ({ ...prevErrors, notes: errorMessage }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    const currentErrors = {};
+    if (!member.firstName.trim()) currentErrors.firstName = 'First Name is required.';
+    if (!member.lastName.trim()) currentErrors.lastName = 'Last Name is required.';
+    if (!member.position.trim()) currentErrors.position = 'Position is required.';
+    if (!member.libraryCardNumber.trim()) currentErrors.libraryCardNumber = 'Library Card Number is required.';
+
     setErrors(currentErrors);
 
-    // Check if there are any errors left after validation
-    let isValid = true;
-    for (const key in currentErrors) {
-      if (currentErrors[key]) {
-        isValid = false;
-        break;
+    if (!Object.values(currentErrors).some(Boolean)) {
+      try {
+        await MemberService.create(member);
+        Swal.fire('Member Added!', `The member '${member.firstName}' has been successfully added.`, 'success');
+        navigate('/members');
+      } catch (error) {
+        Swal.fire('Error!', 'There was an error adding the book. Please check your data or try again later.', 'error');
       }
-    }
-
-    if (isValid) {
-      const newMember = { ...member, id: nanoid() };
-      const updatedMembers = [...JSON.parse(localStorage.getItem('members') || '[]'), newMember];
-      localStorage.setItem('members', JSON.stringify(updatedMembers));
-      navigate('/members')
-      Swal.fire({
-        icon: 'success',
-        title: 'Member Added!',
-        text: `The member '${member.fullName}' has been successfully added.`,
-        confirmButtonText: 'OK',
-        timer: 2000,
-        timerProgressBar: true,
-        willClose: () => {
-          Swal.stopTimer();
-        }
-      });
-      resetForm();
     } else {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: 'Please fix the errors before submitting the form.',
-        confirmButtonText: 'OK'
-      });
+      Swal.fire('Oops...', 'Please fix the errors before submitting the form.', 'error');
     }
   };
 
   const resetForm = () => {
     setMember({
-      id: '',
-      fullName: '',
-      email: '',
-      gender: '',
-      phone: '',
-      address: ''
+      firstName: '',
+      lastName: '',
+      position: '',
+      privilage: '',
+      libraryCardNumber: '',
+      notes: '',
     });
-    setHasInput(false);
     setErrors({});
   };
 
@@ -163,106 +133,101 @@ const AddMemberPage = () => {
         <h2 className="text-lg font-bold text-center">Add Member</h2>
 
         <div>
-          <label className="block mb-1">Full Name</label>
+          <label className="block mb-1">First Name</label>
           <input
             type="text"
-            name="fullName"
-            ref={fullNameInputRef}
-            value={member.fullName}
-            onChange={handleFullNameChange}
-            placeholder="Full Name"
-            className={`bg-white border ${errors.fullName ? 'border-red-500' : 'border-gray-500'} text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5`}
+            name="firstName"
+            ref={firstNameInputRef}
+            value={member.firstName}
+            onChange={handleFirstNameChange}
+            placeholder="First Name"
+            className={`bg-white border ${errors.firstName ? 'border-red-500' : 'border-gray-500'} text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5`}
           />
-          {errors.fullName && <p className="text-red-500 text-xs">{errors.fullName}</p>}
+          {errors.firstName && <p className="text-red-500 text-xs">{errors.firstName}</p>}
         </div>
 
         <div>
-          <label className="block mb-1">Email</label>
-          <input
-            type="email"
-            name="email"
-            value={member.email}
-            onChange={handleEmailChange}
-            placeholder="Email"
-            className={`bg-white border ${errors.email ? 'border-red-500' : 'border-gray-500'} text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5`}
-          />
-          {errors.email && <p className="text-red-500 text-xs">{errors.email}</p>}
-        </div>
-
-        <div>
-          <label className="block mb-1">Phone</label>
+          <label className="block mb-1">Last Name</label>
           <input
             type="text"
-            name="phone"
-            value={member.phone}
-            onChange={handlePhoneChange}
-            placeholder="+62xxxxxxx"
-            className={`bg-white border ${errors.phone ? 'border-red-500' : 'border-gray-500'} text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5`}
+            name="lastName"
+            value={member.lastName}
+            onChange={handleLastNameChange}
+            placeholder="Last Name"
+            className={`bg-white border ${errors.lastName ? 'border-red-500' : 'border-gray-500'} text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5`}
           />
-          {errors.phone && <p className="text-red-500 text-xs">{errors.phone}</p>}
+          {errors.lastName && <p className="text-red-500 text-xs">{errors.lastName}</p>}
         </div>
 
         <div>
-          <label className="block mb-1">Gender</label>
-          <div className="flex space-x-4">
-            <label className="inline-flex items-center">
-              <input
-                type="radio"
-                name="gender"
-                value="Male"
-                checked={member.gender === 'Male'}
-                onChange={handleGenderChange}
-                className="form-radio text-blue-500"
-              />
-              <span className="ml-2">Male</span>
-            </label>
-            <label className="inline-flex items-center">
-              <input
-                type="radio"
-                name="gender"
-                value="Female"
-                checked={member.gender === 'Female'}
-                onChange={handleGenderChange}
-                className="form-radio text-blue-500"
-              />
-              <span className="ml-2">Female</span>
-            </label>
-          </div>
-          {errors.gender && <p className="text-red-500 text-xs">{errors.gender}</p>}
+          <label className="block mb-1">Position</label>
+          <select
+            name="position"
+            onChange={handlePositionChange}
+            className="bg-white border border-gray-500 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+          >
+            <option value="">-- Select Position --</option>
+            <option value="Library Manager">Library Manager</option>
+            <option value="Librarian">Librarian</option>
+            <option value="Library User">Library User</option>
+          </select>
+          {errors.position && <p className="text-red-500 text-xs">{errors.position}</p>}
         </div>
 
         <div>
-          <label className="block mb-1">Address</label>
+          <label className="block mb-1">Library Card Number</label>
+          <input
+            type="text"
+            name="libraryCardNumber"
+            value={member.libraryCardNumber}
+            onChange={handleLibraryCardNumberChange}
+            placeholder="Library Card Number"
+            className={`bg-white border ${errors.libraryCardNumber ? 'border-red-500' : 'border-gray-500'} text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5`}
+          />
+          {errors.libraryCardNumber && <p className="text-red-500 text-xs">{errors.libraryCardNumber}</p>}
+        </div>
+
+        <div>
+          <label className="block mb-1">Privilage</label>
           <textarea
-            name="address"
-            value={member.address}
-            onChange={handleAddressChange}
-            placeholder="Address"
-            className={`bg-white border ${errors.address ? 'border-red-500' : 'border-gray-500'} text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5`}
+            name="privilage"
+            value={member.privilage}
+            onChange={handlePrivilageChange}
+            placeholder="Privilage"
+            className={`bg-white border ${errors.privilage ? 'border-red-500' : 'border-gray-500'} text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5`}
           />
-          {errors.address && <p className="text-red-500 text-xs">{errors.address}</p>}
+        </div>
+        <div>
+          <label className="block mb-1">Notes</label>
+          <textarea
+            name="notes"
+            value={member.notes}
+            onChange={handleNotesChange}
+            placeholder="Notes"
+            className={`bg-white border ${errors.notes ? 'border-red-500' : 'border-gray-500'} text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5`}
+          />
+          {errors.notes && <p className="text-red-500 text-xs">{errors.notes}</p>}
         </div>
 
         <div className="flex justify-center space-x-4">
           <Button
             type="submit"
             variant="bg-green-600 hover:bg-green-700"
+            className="px-4 py-2 text-white rounded"
           >
             Submit
           </Button>
-          {hasInput && (
-            <button
-              type="button"
-              onClick={() => { resetForm(); navigate('/members'); }}
-              className="bg-gray-500 text-white p-2 px-5 rounded-md"
-            >
-              Cancel
-            </button>
-          )}
+          <Button
+            type="button"
+            onClick={resetForm}
+            variant="bg-gray-600 hover:bg-gray-700"
+            className="px-4 py-2 text-white rounded"
+          >
+            Reset
+          </Button>
         </div>
       </form>
     </div>
   );
 };
-
 export default AddMemberPage;

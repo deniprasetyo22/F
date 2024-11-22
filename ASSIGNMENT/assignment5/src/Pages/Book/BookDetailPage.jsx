@@ -174,7 +174,7 @@ const BookDetailPage = () => {
 
             {isModalOpen && (
                 <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
-                    <div className="bg-white p-6 rounded-lg w-96">
+                    <div className="bg-white p-6 rounded-lg w-96 max-h-[80vh] overflow-y-auto">
                         <h2 className="text-xl font-bold mb-4 text-center">Edit Book</h2>
                         <form onSubmit={handleSubmit}>
                             <div className="mb-4">

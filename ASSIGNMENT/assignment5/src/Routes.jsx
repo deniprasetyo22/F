@@ -43,7 +43,7 @@ const Routes = createBrowserRouter(
                     element: <AddMemberPage />
                 },
                 {
-                    path: '/members/:id',
+                    path: '/members/:userId',
                     element: <MemberDetailPage />
                 },
                 {

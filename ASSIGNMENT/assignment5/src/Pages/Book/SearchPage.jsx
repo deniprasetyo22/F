@@ -5,7 +5,7 @@ import BookService from '../../Services/BookService';
 import ReactPaginate from 'react-paginate';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import Button from '../../components/Elements/Button';
+import Loading from '../../components/Elements/Loading';
 
 const fetchBooks = async ({ pageNumber, pageSize, searchQuery }) => {
     const { data } = await BookService.getAll({
@@ -22,13 +22,14 @@ const SearchPage = () => {
     const pageSizes = [8, 16, 32, 64];
     const [searchQuery, setSearchQuery] = useState('');
 
+
     const { data, isLoading, isError } = useQuery({
         queryKey: ['books', pageNumber, pageSize, searchQuery],
         queryFn: () => fetchBooks({ pageNumber, pageSize, searchQuery }),
         placeholderData: keepPreviousData
     });
 
-    if (isLoading) return <p>Loading...</p>;
+    if (isLoading) return <Loading isLoading={isLoading} />;
     if (isError) return <p>Error fetching books</p>;
 
     const totalPages = Math.ceil(data.total / pageSize);

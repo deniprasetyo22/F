@@ -22,7 +22,7 @@ const AddBorrowPage = () => {
         const storedMembers = JSON.parse(localStorage.getItem('members')) || [];
         const memberOptions = storedMembers.map((member) => ({
             value: member.id,
-            label: member.fullName, // Assuming 'fullName' is the property name for member's name
+            label: member.fullName,
         }));
         setMembers(memberOptions);
 
