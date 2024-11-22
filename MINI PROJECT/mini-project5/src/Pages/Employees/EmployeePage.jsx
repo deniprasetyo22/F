@@ -26,6 +26,7 @@ const fetchEmployees = async ({ pageNumber, pageSize, sortField, sortOrder, sear
         Position: searchType === 'position' ? searchQuery : '',
         Level: searchType === 'level' ? searchQuery : '',
         EmpType: searchType === 'empType' ? searchQuery : '',
+        Status: searchType === 'status' ? searchQuery : '',
         LastUpdated: searchType === 'lastUpdated' ? searchQuery : ''
     };
 
@@ -128,7 +129,6 @@ const EmployeePage = () => {
         }
     };
 
-
     return (
         <div className="p-4 border rounded my-5">
             <h2 className="text-lg font-bold text-center mb-4">Employee List</h2>
@@ -147,6 +147,7 @@ const EmployeePage = () => {
                         <option value="position">By Position</option>
                         <option value="level">By Level</option>
                         <option value="empType">By Employee Type</option>
+                        <option value="status">By Status</option>
                         <option value="lastUpdated">By Last Updated</option>
                     </select>
                     <input
@@ -206,6 +207,13 @@ const EmployeePage = () => {
                             </th>
                             <th className="border p-2">
                                 <button
+                                    onClick={() => handleSort('status')}
+                                    className="text-decoration-none text-dark p-0">
+                                    Status {getSortIcon('status')}
+                                </button>
+                            </th>
+                            <th className="border p-2">
+                                <button
                                     onClick={() => handleSort('lastupdateddate')}
                                     className="text-decoration-none text-dark p-0">
                                     Last Updated {getSortIcon('lastupdateddate')}
@@ -232,6 +240,7 @@ const EmployeePage = () => {
                                         <td className="border p-2">{employee.position}</td>
                                         <td className="border p-2">{employee.level}</td>
                                         <td className="border p-2">{employee.emptype}</td>
+                                        <td className="border p-2">{employee.status}</td>
                                         <td className="border p-2">{formatDateTimeFromDB(employee.lastupdateddate)}</td>
                                         <td className="p-2 flex justify-center items-center space-x-2">
                                             <Button variant="bg-yellow-500 hover:bg-yellow-600">

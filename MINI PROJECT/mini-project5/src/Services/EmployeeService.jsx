@@ -25,7 +25,15 @@ const remove = async (empid) => {
 };
 
 const deactive = async (empid, reason) => {
-    return await API.put(`/employee/deactivate/${empid}`, reason);
+    return await API.put(`/employee/deactivate/${empid}`, JSON.stringify(reason), {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+};
+
+const activate = async (empid) => {
+    return await API.put(`/employee/activate/${empid}`)
 };
 
 const EmployeeService = {
@@ -35,7 +43,8 @@ const EmployeeService = {
     create,
     update,
     remove,
-    deactive
+    deactive,
+    activate
 };
 
 export default EmployeeService;
