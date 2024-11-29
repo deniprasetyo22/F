@@ -14,9 +14,19 @@ const login = async (userData) => {
 };
 
 const logout = async () => {
-    await API.post(`auth/logout`);
-    localStorage.removeItem('user');
+    try {
+        const user = JSON.parse(localStorage.getItem("user"));
+        await API.post(`/auth/logout`, {}, {
+            headers: {
+                Authorization: `Bearer ${user.token}`
+            }
+        });
+        localStorage.removeItem('user');
+    } catch (error) {
+        console.error("Logout error:", error.response ? error.response.data : error.message);
+    }
 };
+
 
 const AuthService = {
     register,
