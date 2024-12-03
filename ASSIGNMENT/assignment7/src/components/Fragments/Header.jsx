@@ -147,7 +147,17 @@ const Header = () => {
         {
             label: 'Books',
             path: '/books',
-            visibleForRoles: ['Librarian', 'Library Manager']
+            visibleForRoles: ['Librarian', 'Library Manager', 'Library User']
+        },
+        {
+            label: 'Book Request',
+            path: '/book-request',
+            visibleForRoles: ['Librarian', 'Library Manager', 'Library User']
+        },
+        {
+            label: 'Upload',
+            path: '/upload',
+            visibleForRoles: ['Librarian', 'Library Manager', 'Library User']
         },
         {
             label: 'Users',

@@ -17,6 +17,8 @@ import PrivateRoute from './PrivateRoute';
 import UserTable from './Pages/UserTable';
 import Unauthorized from './Pages/Auth/Unauthorized';
 import Register from './Pages/Auth/Register';
+import UploadPage from './Pages/UploadPage';
+import BookRequestPage from './Pages/Book/BookRequestPage';
 
 const Routes = createBrowserRouter([
     {
@@ -30,6 +32,14 @@ const Routes = createBrowserRouter([
             {
                 path: "/dashboard",
                 element: <HomePage />,
+            },
+            {
+                path: "/upload",
+                element: <UploadPage />,
+            },
+            {
+                path: "/book-request",
+                element: <BookRequestPage />,
             }
         ],
     },
