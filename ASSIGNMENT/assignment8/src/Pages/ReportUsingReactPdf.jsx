@@ -19,26 +19,14 @@ const ReportUsingReactPdf = () => {
 
     const [pdfFile, setPdfFile] = useState(null);
 
-    // const [startDate, setStartDate] = useState('');
-
-    // const [endDate, setEndDate] = useState('');
-
 
     const handleGenerateReport = async () => {
-        // if (!startDate || !endDate) {
-        //     setError('Harap pilih rentang tanggal lengkap');
-        //     return;
-        // }
 
         try {
             setLoading(true);
             setError(null);
 
             const response = await API.get(`/dashboard/report`, {
-                // params: {
-                //     startDate: startDate,
-                //     endDate: endDate
-                // },
                 responseType: 'blob',
                 withCredentials: true
             });
@@ -85,88 +73,96 @@ const ReportUsingReactPdf = () => {
     };
 
     return (
-        <div className="container">
-            <div className="row">
-
-                {/* <div className="col-md-4 mb-3">
-                    <label className="form-label">Tanggal Mulai</label>
-                    <input type="date" className="form-control" value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)} />
-                </div>
-                <div className="col-md-4 mb-3">
-                    <label className="form-label">Tanggal Akhir</label>
-                    <input type="date" className="form-control" value={endDate}
-                        onChange={(e) => setEndDate(e.target.value)} />
-                </div> */}
-
-
-                <div className="mb-2">
-                    <button onClick={handleGenerateReport} disabled={loading} className="btn btn-primary me-2">
+        <div className="container mx-auto p-6">
+            <div className="flex flex-col md:flex-row justify-center mb-4 space-y-4 md:space-y-0 md:space-x-4">
+                <div>
+                    <button onClick={handleGenerateReport} disabled={loading} className="btn bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 flex items-center">
                         {loading ? (
                             <>
-                                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
                                 Loading...
                             </>
-                        ) : ('Lihat Laporan')}
+                        ) : 'Lihat Laporan'}
                     </button>
-                    {pdfFile && (
-                        <button className="btn btn-success" onClick={handleDownloadPDF}>
+                </div>
+                {pdfFile && (
+                    <div>
+                        <button className="btn bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600" onClick={handleDownloadPDF}>
                             Unduh PDF
                         </button>
-                    )}
-                </div>
-                <div className="col-12">
-                    {/* PDF Viewer */}
-                    {showPDF && (
-                        <div className="card">
-                            <div className="card-body">
-                                {loading && (
-                                    <div className="text-center">
-                                        <div className="spinner-border text-primary" role="status">
-                                            <span className="visually-hidden">Loading...</span>
-                                        </div>
+                    </div>
+                )}
+            </div>
+            <div className="col-12">
+                {/* PDF Viewer */}
+                {showPDF && (
+                    <div className="border rounded-lg shadow-lg">
+                        <div className="p-4">
+                            {loading && (
+                                <div className="text-center">
+                                    <div className="spinner-border text-primary" role="status">
+                                        <span className="visually-hidden">Loading...</span>
                                     </div>
-                                )}
+                                </div>
+                            )}
 
-                                {error && (
-                                    <div className="alert alert-danger" role="alert"> {error}</div>
-                                )}
+                            {error && (
+                                <div className="alert alert-danger text-red-600" role="alert">
+                                    {error}
+                                </div>
+                            )}
 
-                                {pdfFile && (
-                                    <>
-                                        <Document file={pdfFile} onLoadSuccess={onDocumentLoadSuccess}
-                                            onLoadError={onDocumentLoadError}
-                                            loading={
-                                                <div className="text-center">
-                                                    <div className="spinner-border text-primary" role="status">
-                                                        <span className="visually-hidden">Loading...</span>
-                                                    </div>
+                            {pdfFile && (
+                                <>
+                                    <Document
+                                        file={pdfFile}
+                                        onLoadSuccess={onDocumentLoadSuccess}
+                                        onLoadError={onDocumentLoadError}
+                                        loading={
+                                            <div className="text-center">
+                                                <div className="spinner-border text-primary" role="status">
+                                                    <span className="visually-hidden">Loading...</span>
                                                 </div>
-                                            }>
-                                            <Page pageNumber={pageNumber} renderTextLayer={false} renderAnnotationLayer={false}
-                                                className="mx-auto" width={Math.min(window.innerWidth * 0.9, 800)} />
-                                        </Document>
-                                        {numPages && (
-                                            <div className="d-flex justify-content-between align-items-center mt-3">
-                                                <button onClick={goToPreviousPage} disabled={pageNumber <= 1} className="btn btn-primary">
-                                                    Previous
-                                                </button>
-
-                                                <p className="mb-0"> Page {pageNumber} of {numPages} </p>
-
-                                                <button onClick={goToNextPage} disabled={pageNumber >= numPages} className="btn btn-primary">
-                                                    Next
-                                                </button>
                                             </div>
-                                        )}
-                                    </>
-                                )}
-                            </div>
+                                        }
+                                    >
+                                        <Page
+                                            pageNumber={pageNumber}
+                                            renderTextLayer={false}
+                                            renderAnnotationLayer={false}
+                                            className="mx-auto"
+                                            width={Math.min(window.innerWidth * 0.9, 800)}
+                                        />
+                                    </Document>
+                                    {numPages && (
+                                        <div className="flex justify-between items-center mt-3">
+                                            <button
+                                                onClick={goToPreviousPage}
+                                                disabled={pageNumber <= 1}
+                                                className="btn bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                                            >
+                                                Previous
+                                            </button>
+
+                                            <p className="mb-0">Page {pageNumber} of {numPages}</p>
+
+                                            <button
+                                                onClick={goToNextPage}
+                                                disabled={pageNumber >= numPages}
+                                                className="btn bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                                            >
+                                                Next
+                                            </button>
+                                        </div>
+                                    )}
+                                </>
+                            )}
                         </div>
-                    )}
-                </div>
+                    </div>
+                )}
             </div>
         </div>
+
     );
 
 }
